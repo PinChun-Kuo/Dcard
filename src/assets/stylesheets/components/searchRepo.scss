@@ -1,0 +1,24 @@
+.search-repos {
+  .search-repo {
+    padding: 16px;
+    border-radius: 4px;
+    background-color: #FFFFFF;
+
+    &:not(:last-child) {
+      margin-bottom: 16px;
+    }
+
+    &__detail {
+      display: flex;
+      text-decoration: none;
+
+      .repo-image {
+        height: 100px;
+      }
+
+      .repo-info {
+        margin-left: 16px;
+      }
+    }
+  }
+}

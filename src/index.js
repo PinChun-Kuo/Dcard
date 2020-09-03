@@ -1,9 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-const temp = (<div>Hello Dcard</div>);
+import App from './components';
+import './assets/stylesheets/index.scss';
 
 ReactDOM.render(
-  temp,
+  <App />,
   document.getElementById('root')
 );
