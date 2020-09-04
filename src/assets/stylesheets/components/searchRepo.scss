@@ -10,6 +10,8 @@
 
     &__detail {
       display: flex;
+      align-items: center;
+      color: #000000;
       text-decoration: none;
 
       .repo-image {

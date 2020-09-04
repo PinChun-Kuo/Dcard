@@ -6,8 +6,14 @@ const SearchRepo = ({ repoName, repoUrl, ownerName, avatarUrl }) => (
     <a className='search-repo__detail' href={repoUrl} target='_blank'>
       <img className='repo-image' src={avatarUrl} />
       <div className='repo-info'>
-        <p className='repo-name'>{repoName}</p>
-        <p className='repo-owner-name'>{ownerName}</p>
+        <p className='repo-name'>
+          <span>Repository Name：</span>
+          <span>{repoName}</span>
+        </p>
+        <p className='repo-author'>
+          <span>Author：</span>
+          <span>{ownerName}</span>
+        </p>
       </div>
     </a>
   </div>

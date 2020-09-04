@@ -23,12 +23,13 @@ const SearchBar = ({ classes, inputRef, inputClasses, updateQuery }) => {
 
   return (
     <div className={classNames('search-bar', classes)}>
+      <label className='search-label'>Search Repository：</label>
       <input
         ref={inputRef}
         value={keyword}
         className={classNames('search-input', inputClasses, { 'has-error': !!error })}
         type='text'
-        placeholder='Please enter search keyword'
+        placeholder='Please enter repository name'
         onChange={handleChange}
       />
       { error && ( <span className='error-msg'>{error}</span> ) }
