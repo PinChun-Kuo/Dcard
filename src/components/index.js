@@ -1,15 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
+import { debounce } from 'lodash';
 
 import SearchBar from './searchBar';
 import SearchRepo from './searchRepo';
 
-const getRepos = async keyword => {
+const getRepos = async query => {
   const res = await axios({
     method: 'get',
     url: `https://api.github.com/search/repositories`,
     params: {
-      q: keyword,
+      q: query,
       per_page: 5
     },
     responseType: 'json'
@@ -19,23 +20,27 @@ const getRepos = async keyword => {
 };
 
 const App = () => {
-  const [keyword, setKeyword] = useState('');
+  const inputRef = useRef();
+  const [query, setQuery] = useState('');
   const [repositories, setRepositories] = useState([]);
-  const updateKeyword = e => { setKeyword(e.target.value) }
+  const updateQuery = debounce(
+    () => setQuery(inputRef.current.value),
+    800
+  );
 
   useEffect(() => {
-    keyword.trim() ? (
-      getRepos(keyword).then(repos => {
+    query.trim() ? (
+      getRepos(query).then(repos => {
         setRepositories(repos);
       }).catch(res => {
         console.log('API Error : ', res.message);
       })
     ) : setRepositories([]);
-  }, [keyword]);
+  }, [query]);
 
   return (
     <div className='search-wrapper'>
-      <SearchBar keyword={keyword} handleChange={updateKeyword} />
+      <SearchBar inputRef={inputRef} updateQuery={updateQuery} />
       {
         (repositories.length > 0) && (
           <div className='search-repos'>
