@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { debounce } from 'lodash';
 
+import Loading from './loading';
 import SearchBar from './searchBar';
 import SearchRepo from './searchRepo';
 
@@ -21,6 +22,7 @@ const getRepos = async query => {
 
 const App = () => {
   const inputRef = useRef();
+  const [isLoading, setIsLoading] = useState(false);
   const [query, setQuery] = useState('');
   const [repositories, setRepositories] = useState([]);
   const updateQuery = debounce(
@@ -29,32 +31,41 @@ const App = () => {
   );
 
   useEffect(() => {
-    query.trim() ? (
+    if (query.trim()) {
+      setIsLoading(true);
       getRepos(query).then(repos => {
         setRepositories(repos);
+        setIsLoading(false);
       }).catch(res => {
+        setIsLoading(false);
         console.log('API Error : ', res.message);
-      })
-    ) : setRepositories([]);
+      });
+    } else {
+      setRepositories([]);
+    }
   }, [query]);
 
   return (
     <div className='search-wrapper'>
       <SearchBar inputRef={inputRef} updateQuery={updateQuery} />
       {
-        (repositories.length > 0) && (
-          <div className='search-repos'>
-            {
-              repositories.map(repository => (
-                <SearchRepo
-                  repoName={repository.full_name}
-                  repoUrl={repository.html_url}
-                  ownerName={repository.owner.login}
-                  avatarUrl={repository.owner.avatar_url}
-                />
-              ))
-            }
-          </div>
+        isLoading ? (
+          <Loading />
+        ) : (
+          (repositories.length > 0) && (
+            <div className='search-repos'>
+              {
+                repositories.map(repository => (
+                  <SearchRepo
+                    repoName={repository.full_name}
+                    repoUrl={repository.html_url}
+                    ownerName={repository.owner.login}
+                    avatarUrl={repository.owner.avatar_url}
+                  />
+                ))
+              }
+            </div>
+          )
         )
       }
     </div>
