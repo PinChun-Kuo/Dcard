@@ -6,13 +6,14 @@ import Loading from './loading';
 import SearchBar from './searchBar';
 import SearchRepo from './searchRepo';
 
-const getRepos = async query => {
+const getRepos = async (query, page = 1) => {
   const res = await axios({
     method: 'get',
-    url: `https://api.github.com/search/repositories`,
+    url: 'https://api.github.com/search/repositories',
     params: {
       q: query,
-      per_page: 5
+      per_page: 20,
+      page
     },
     responseType: 'json'
   })
@@ -22,25 +23,60 @@ const getRepos = async query => {
 
 const App = () => {
   const inputRef = useRef();
+  const observerRef = useRef();
+  const prevY = useRef(0);
   const [isLoading, setIsLoading] = useState(false);
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState({ keyword: '', page: 1 });
+  const [resetPage, setResetPage] = useState(false);
   const [repositories, setRepositories] = useState([]);
   const updateQuery = debounce(
-    () => setQuery(inputRef.current.value),
+    () => {
+      prevY.current = 0;
+      setResetPage(true);
+      setIsLoading(true);
+      setQuery({ keyword: inputRef.current.value, page: 1 });
+    },
     800
   );
 
+  const handleObserver = (entities, observer) => {
+    const y = entities[0].boundingClientRect.y;
+
+    if (prevY.current > y) {
+      setQuery(({ page, ...rest }) => ({ page: page + 1, ...rest }))
+    }
+
+    prevY.current = y;
+  }
+
+  const observer = new IntersectionObserver(
+    handleObserver,
+    { root: null, rootMargin: "0px", threshold: 0 }
+  );
+
   useEffect(() => {
-    if (query.trim()) {
-      setIsLoading(true);
-      getRepos(query).then(repos => {
-        setRepositories(repos);
+    observer.observe(observerRef.current);
+  }, [])
+
+  useEffect(() => {
+    const { keyword, page } = query
+
+    if (keyword.trim()) {
+      getRepos(keyword, page).then(repos => {
+        if (resetPage) {
+          setRepositories(repos);
+          setResetPage(false);
+        } else {
+          setRepositories(repositories.concat(repos));
+        }
+
         setIsLoading(false);
       }).catch(res => {
         setIsLoading(false);
         console.log('API Error : ', res.message);
       });
     } else {
+      setIsLoading(false);
       setRepositories([]);
     }
   }, [query]);
@@ -68,6 +104,7 @@ const App = () => {
           )
         )
       }
+      <div class="observer" ref={observerRef}></div>
     </div>
   )
 };
